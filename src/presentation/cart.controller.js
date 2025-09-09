@@ -1,89 +1,101 @@
-import { ensureSeed } from "../business/cart.store.js";
-import * as actions from "../business/cart.actions.js";
-import { CartView as view } from "./cart.view.js";
+import { store } from '../business/cart.store.js';
+import { actions } from '../business/cart.actions.js';
+import { view } from './cart.view.js';
 
-function getSnapshotAndUpdate() {
-  const snapshot = actions.getSnapshot();
-  view.update(snapshot);
+function getMount() {
+  return document.getElementById('app');
 }
 
-function onSelectAll(e) {
-  const checked = e.target.checked;
-  actions.toggleSelectAll(checked);
-  getSnapshotAndUpdate();
+function datasetId(el) {
+  const article = el.closest('article[data-id]');
+  return article ? article.getAttribute('data-id') : null;
 }
 
-function findId(el) {
-  const row = el.closest("[data-id]");
-  return row ? row.getAttribute("data-id") : undefined;
-}
+export const controller = {
+  init() {
+    store.ensureSeed();
+    const mount = getMount();
+    view.init(mount);
+    const snapshot = actions.getSnapshot();
+    view.render(snapshot);
+    this.bind();
+  },
 
-function onSelectItem(e) {
-  const id = findId(e.target);
-  if (!id) return;
-  actions.toggleSelect(id);
-  getSnapshotAndUpdate();
-}
+  bind() {
+    const mount = getMount();
 
-function onQtyChange(e) {
-  const id = findId(e.target);
-  if (!id) return;
-  const value = e.target.value;
-  actions.updateQty(id, value);
-  getSnapshotAndUpdate();
-}
+    // Click handlers
+    mount.addEventListener('click', (e) => {
+      const target = e.target;
+      const action = target?.getAttribute('data-action');
+      if (!action) return;
 
-function onRemove(e) {
-  const id = findId(e.target);
-  if (!id) return;
-  actions.removeItem(id);
-  getSnapshotAndUpdate();
-}
+      if (action === 'inc') {
+        const id = datasetId(target);
+        if (!id) return;
+        actions.incrementQty(id);
+      }
 
-function onInc(e) {
-  const id = findId(e.target);
-  if (!id) return;
-  actions.incrementQty(id);
-  getSnapshotAndUpdate();
-}
+      if (action === 'dec') {
+        const id = datasetId(target);
+        if (!id) return;
+        actions.decrementQty(id);
+      }
 
-function onDec(e) {
-  const id = findId(e.target);
-  if (!id) return;
-  actions.decrementQty(id);
-  getSnapshotAndUpdate();
-}
+      if (action === 'remove') {
+        const id = datasetId(target);
+        if (!id) return;
+        actions.removeItem(id);
+      }
 
-function bindEvents(root) {
-  root.addEventListener("change", (e) => {
-    const action = e.target?.dataset?.action;
-    if (action === "select-all") return onSelectAll(e);
-    if (action === "select") return onSelectItem(e);
-    if (action === "qty") return onQtyChange(e);
-  });
+      const snapshot = actions.getSnapshot();
+      view.update(snapshot);
+    });
 
-  root.addEventListener("click", (e) => {
-    const el = e.target;
-    if (!(el instanceof HTMLElement)) return;
-    const action = el.dataset?.action;
-    if (action === "inc") return onInc(e);
-    if (action === "dec") return onDec(e);
-    if (action === "remove") return onRemove(e);
-  });
-}
+    // Change handlers (checkboxes)
+    mount.addEventListener('change', (e) => {
+      const target = e.target;
+      const action = target?.getAttribute('data-action');
+      if (!action) return;
 
-export function init() {
-  ensureSeed();
-  const snapshot = actions.getSnapshot();
-  const root = document.querySelector("#app");
-  bindEvents(document);
-  view.render(snapshot);
-}
+      if (action === 'select-all') {
+        const checked = target.checked;
+        actions.toggleSelectAll(checked);
+      }
 
-// Initialize on module load after DOM ready
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => init());
-} else {
-  init();
-}
+      if (action === 'select') {
+        const id = datasetId(target);
+        if (!id) return;
+        actions.toggleSelect(id);
+      }
+
+      if (action === 'qty' && target.matches('input[type="number"]')) {
+        const id = datasetId(target);
+        if (!id) return;
+        const value = parseInt(target.value, 10);
+        actions.updateQty(id, value);
+      }
+
+      const snapshot = actions.getSnapshot();
+      view.update(snapshot);
+    });
+
+    // Input sanitization (on blur enforce min 1)
+    mount.addEventListener('blur', (e) => {
+      const target = e.target;
+      if (!(target instanceof HTMLInputElement)) return;
+      if (target.getAttribute('data-action') === 'qty') {
+        const id = datasetId(target);
+        if (!id) return;
+        const value = parseInt(target.value, 10);
+        actions.updateQty(id, value);
+        const snapshot = actions.getSnapshot();
+        view.update(snapshot);
+      }
+    }, true);
+  },
+};
+
+// Auto-init when loaded
+window.addEventListener('DOMContentLoaded', () => controller.init());
 

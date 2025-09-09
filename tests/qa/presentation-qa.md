@@ -1,24 +1,34 @@
 # Presentation QA Sheet
 
-- Scenario: 첫 로드 시 시드 주입 확인 (스토어가 없거나 undefined일 때 기본 데이터가 렌더링됨)
-- Scenario: 전체선택 토글 on/off 시 체크 상태가 모든 카드에 반영됨
-- Scenario: 개별선택 토글 시 합계/배송/총액이 즉시 갱신됨 (role="status" 읽힘)
-- Scenario: 수량 +/– 클릭 및 직접 입력 시 즉시 합계/배송/총액 갱신, 최소 1로 정규화
-- Scenario: 삭제 버튼 클릭 시 해당 카드 제거, 합계/배송/총액 갱신
-- Scenario: 새로고침 후에도 선택/수량/삭제 상태가 유지됨 (localStorage 반영)
+- 시나리오
+  - 첫 로드 → 시드 주입 확인 (localStorage에 cart.items, cart.settings 생성)
+  - 전체선택 토글 on/off → 모든 항목 체크/해제
+  - 개별선택 토글 → 합계/배송/총액リアル타임 반영
+  - 수량 +/– 버튼, 직접 입력 → 1 미만 입력 시 1로 정규화
+  - 삭제 → 목록/합계 즉시 반영
+  - 새로고침 → 직전 상태 유지 확인
 
-- Responsive: 360px에서 카드 영역이 "thumb" → "info" → "actions" 세로 스택
-- Responsive: ≥768px(데스크톱)에서 카드 그리드가 "thumb info actions" 한 줄 배치
-- Responsive: actions 영역은 grid-template-columns: auto auto 1fr auto로 버튼이 겹치지 않음
-- Responsive: 수량 그룹은 inline-flex, 각 버튼 최소 40px, 입력 min-width 56px, 줄바꿈 방지
-- Responsive: 요약 패널은 모바일 하단 블록, 데스크톱에서는 우측 스티키(top:16px)
+- 반응형
+  - 360px 모바일: 카드 세로 스택(thumb → info → actions), 버튼 겹침 없음
+  - 1440px 데스크톱: 카드 그리드 160px 1fr minmax(320px, auto),
+    - 제목 한 줄 고정(말줄임표)
+    - 설명 2줄 클램프
+    - 액션 영역 최소 너비 320px 유지
+  - 우측 요약 패널: 데스크톱에서 position: sticky; top:16px; 동작
 
-- A11y: 모든 버튼/입력은 탭으로 포커스 가능
-- A11y: 포커스 링는 outline:2px solid var(--accent), offset 2px로 시각적 구분
-- A11y: 합계 영역은 role="status" aria-live="polite"로 스크린리더가 변화 읽음
-- A11y: 이미지에 alt 제공, 체크박스/수량 컨트롤에 적절한 aria-label 적용
+- 접근성
+  - 모든 인터랙티브 요소 탭 포커스 가능
+  - 포커스 스타일 outline 2px accent 적용
+  - 합계 패널 role="status"로 화면읽기기에서 합계 업데이트 읽힘
+  - 이미지 alt 제공, 긴 제목은 title 속성에 전체 텍스트 제공
 
-- Visual: 포인트 색(#ff3d00)이 버튼(위험/주요), 포커스, 가격 강조, 총액에 일관되게 반영
-- Visual: 설명 텍스트는 2줄 클램프 유지(-webkit-line-clamp:2), 카드 높이 균일
-- Visual: 버튼/아이콘이 그리드 및 min-width로 겹치거나 밀려나지 않음
+- 비즈니스 규칙 검증
+  - 선택합은 선택된 항목의 price*qty 합
+  - 배송비: 0 → 0원, 49,999 → 3,000원, 50,000 → 0원
+  - 총액 = 선택합 + 배송비
+  - 수량은 최소 1로 유지
+  - 전체선택 on/off, 개별 토글, 삭제 기능 정상 동작
 
+- 로컬스토리지
+  - 키가 없거나 파싱 실패 시 ensureSeed로 시드 복구
+  - 변경 즉시 저장되어 새로고침 후 상태 유지

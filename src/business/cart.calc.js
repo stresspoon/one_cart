@@ -1,14 +1,12 @@
-import { SHIPPING_THRESHOLD, SHIPPING_FEE } from "./cart.domain.js";
+import { SHIPPING_THRESHOLD, SHIPPING_FEE } from './cart.domain.js';
 
 export function sumSelected(items) {
-  return items
-    .filter((i) => i.selected)
-    .reduce((acc, i) => acc + i.price * i.qty, 0);
+  return items.reduce((acc, it) => acc + (it.selected ? (it.price * it.qty) : 0), 0);
 }
 
 export function shippingFee(sum) {
-  if (sum > 0 && sum < SHIPPING_THRESHOLD) return SHIPPING_FEE;
-  return 0;
+  if (sum <= 0) return 0;
+  return sum < SHIPPING_THRESHOLD ? SHIPPING_FEE : 0;
 }
 
 export function grandTotal(sum) {

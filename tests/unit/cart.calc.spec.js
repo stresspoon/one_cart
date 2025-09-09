@@ -1,36 +1,33 @@
-// Unit tests for cart.calc.js
-import { sumSelected, shippingFee, grandTotal } from "../../src/business/cart.calc.js";
+// Lightweight spec using console.assert for boundaries
+import { sumSelected, shippingFee, grandTotal } from '../../src/business/cart.calc.js';
 
-function test(name, fn) {
-  try { fn(); console.log("✓", name); }
-  catch (e) { console.error("✗", name, "\n", e); }
-}
+function it(name, fn) { try { fn(); console.log('✓', name); } catch (e) { console.error('✗', name); console.error(e); } }
+function expect(actual) { return { toBe: (v) => console.assert(Object.is(actual, v), `${actual} !== ${v}`) }; }
 
-test("sumSelected sums only selected items", () => {
-  const items = [
-    { price: 1000, qty: 2, selected: true },
-    { price: 500, qty: 3, selected: false },
-    { price: 200, qty: 1, selected: true },
-  ];
-  console.assert(sumSelected(items) === 1000 * 2 + 200 * 1, "sum mismatch");
+const items = [
+  { price: 10000, qty: 2, selected: true }, // 20000
+  { price: 5000, qty: 3, selected: false }, // 0
+  { price: 15000, qty: 1, selected: true }, // 15000 => total=35000
+];
+
+it('sumSelected sums only selected items', () => {
+  expect(sumSelected(items)).toBe(35000);
 });
 
-// Boundary tests for shipping fee
-test("shipping 0 → 0원", () => {
-  console.assert(shippingFee(0) === 0, "expected 0");
+it('shippingFee boundary: 0 → 0원', () => {
+  expect(shippingFee(0)).toBe(0);
 });
 
-test("shipping 49,999 → 3,000원", () => {
-  console.assert(shippingFee(49999) === 3000, "expected 3000");
+it('shippingFee boundary: 49,999 → 3,000원', () => {
+  expect(shippingFee(49999)).toBe(3000);
 });
 
-test("shipping 50,000 → 0원", () => {
-  console.assert(shippingFee(50000) === 0, "expected 0");
+it('shippingFee boundary: 50,000 → 0원', () => {
+  expect(shippingFee(50000)).toBe(0);
 });
 
-test("grandTotal = sum + shipping", () => {
-  console.assert(grandTotal(0) === 0, "0 total");
-  console.assert(grandTotal(1000) === 1000 + 3000, "+shipping under threshold");
-  console.assert(grandTotal(50000) === 50000, "no shipping at threshold");
+it('grandTotal = sum + shipping', () => {
+  expect(grandTotal(35000)).toBe(35000 + 3000);
+  expect(grandTotal(50000)).toBe(50000 + 0);
 });
 

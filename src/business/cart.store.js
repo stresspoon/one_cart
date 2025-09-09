@@ -1,51 +1,52 @@
-import { DEFAULT_SETTINGS, SEED_ITEMS } from "../fixtures/seed.js";
+import { SEED_ITEMS, DEFAULT_SETTINGS } from '../fixtures/seed.js';
 
 const KEYS = {
-  ITEMS: "cart.items",
-  SETTINGS: "cart.settings",
+  items: 'cart.items',
+  settings: 'cart.settings',
 };
 
 function safeParse(json) {
-  if (json === undefined || json === null) return undefined;
   try {
-    const val = JSON.parse(json);
-    if (val === undefined) return undefined;
-    return val;
+    const v = JSON.parse(json);
+    return v === undefined ? null : v;
   } catch {
-    return undefined;
+    return null;
   }
 }
 
-export function ensureSeed() {
-  const rawItems = localStorage.getItem(KEYS.ITEMS);
-  const rawSettings = localStorage.getItem(KEYS.SETTINGS);
+export const store = {
+  ensureSeed() {
+    const rawItems = localStorage.getItem(KEYS.items);
+    const rawSettings = localStorage.getItem(KEYS.settings);
+    const parsedItems = rawItems ? safeParse(rawItems) : null;
+    const parsedSettings = rawSettings ? safeParse(rawSettings) : null;
 
-  const items = safeParse(rawItems);
-  const settings = safeParse(rawSettings);
+    if (!parsedItems || !Array.isArray(parsedItems)) {
+      localStorage.setItem(KEYS.items, JSON.stringify(SEED_ITEMS));
+    }
+    if (!parsedSettings || typeof parsedSettings !== 'object') {
+      localStorage.setItem(KEYS.settings, JSON.stringify(DEFAULT_SETTINGS));
+    }
+  },
 
-  if (!Array.isArray(items)) {
-    localStorage.setItem(KEYS.ITEMS, JSON.stringify(SEED_ITEMS));
-  }
-  if (!settings || typeof settings !== "object") {
-    localStorage.setItem(KEYS.SETTINGS, JSON.stringify(DEFAULT_SETTINGS));
-  }
-}
+  getItems() {
+    const raw = localStorage.getItem(KEYS.items);
+    const parsed = raw ? safeParse(raw) : null;
+    return Array.isArray(parsed) ? parsed : [];
+  },
 
-export function getItems() {
-  const parsed = safeParse(localStorage.getItem(KEYS.ITEMS));
-  return Array.isArray(parsed) ? parsed : [...SEED_ITEMS];
-}
+  setItems(items) {
+    localStorage.setItem(KEYS.items, JSON.stringify(items));
+  },
 
-export function setItems(items) {
-  localStorage.setItem(KEYS.ITEMS, JSON.stringify(items));
-}
+  getSettings() {
+    const raw = localStorage.getItem(KEYS.settings);
+    const parsed = raw ? safeParse(raw) : null;
+    return parsed && typeof parsed === 'object' ? parsed : { ...DEFAULT_SETTINGS };
+  },
 
-export function getSettings() {
-  const parsed = safeParse(localStorage.getItem(KEYS.SETTINGS));
-  return parsed || { ...DEFAULT_SETTINGS };
-}
-
-export function setSettings(settings) {
-  localStorage.setItem(KEYS.SETTINGS, JSON.stringify(settings));
-}
+  setSettings(settings) {
+    localStorage.setItem(KEYS.settings, JSON.stringify(settings));
+  },
+};
 

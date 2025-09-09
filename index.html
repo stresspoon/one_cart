@@ -1,30 +1,16 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>장바구니</title>
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/assets/styles.css" />
   </head>
   <body>
-    <header class="container">
-      <h1>장바구니</h1>
-    </header>
-
-    <main class="container" data-component="cart-page">
-      <section class="cart-controls">
-        <label class="select-all">
-          <input type="checkbox" id="select-all" />
-          전체 선택
-        </label>
-      </section>
-
-      <section id="cart-root" class="cart-list" aria-label="장바구니 목록"></section>
-
-      <aside id="totals-root" class="totals" aria-live="polite" aria-atomic="true"></aside>
-    </main>
-
-    <script type="module" src="/app.ts"></script>
+    <div id="app"></div>
+    <script type="module">
+      import './src/presentation/cart.controller.js';
+    </script>
   </body>
   </html>
 

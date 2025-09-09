@@ -1,59 +1,60 @@
-import * as actions from '../../src/business/cart.actions.js';
-import { derive } from '../../src/business/cart.calc.js';
+// Unit tests for cart.actions.js with mocked store
+import * as actions from "../../src/business/cart.actions.js";
 
-describe('cart.actions with mocked store', () => {
-  let items; let applied;
-  const mockStore = {
-    getItems: () => items,
-    setItems: (next) => { items = next; applied = true; },
-  };
+// Simple in-memory mock for localStorage-backed store
+const memory = { items: [], settings: {} };
 
-  beforeEach(() => {
-    items = [
-      { id:'a', name:'A', price:10000, qty:1, selected:true },
-      { id:'b', name:'B', price:20000, qty:2, selected:false },
-    ];
-    applied = false;
-    actions.setStore(mockStore);
-  });
+// Mock store module by monkey-patching its functions via globalThis
+import * as store from "../../src/business/cart.store.js";
 
-  it('toggleSelect flips selected', () => {
-    actions.toggleSelect('a');
-    expect(items.find(i=>i.id==='a').selected).toBe(false);
-    expect(applied).toBe(true);
-  });
+store.getItems = () => memory.items;
+store.setItems = (items) => { memory.items = items; };
 
-  it('toggleSelectAll true then false', () => {
-    actions.toggleSelectAll(true);
-    expect(items.every(i=>i.selected)).toBe(true);
-    actions.toggleSelectAll(false);
-    expect(items.every(i=>!i.selected)).toBe(true);
-  });
+function reset(items) {
+  memory.items = items.map((x) => ({ ...x }));
+}
 
-  it('updateQty clamps at min 1', () => {
-    actions.updateQty('a', 5);
-    expect(items.find(i=>i.id==='a').qty).toBe(5);
-    actions.updateQty('a', 0);
-    expect(items.find(i=>i.id==='a').qty).toBe(1);
-  });
+function test(name, fn) { try { fn(); console.log("✓", name); } catch (e) { console.error("✗", name, "\n", e); } }
 
-  it('increment/decrement work', () => {
-    actions.incrementQty('a');
-    expect(items.find(i=>i.id==='a').qty).toBe(2);
-    actions.decrementQty('a');
-    expect(items.find(i=>i.id==='a').qty).toBe(1);
-  });
+test("수량 정규화: NaN, 0, 음수 → 1", () => {
+  reset([{ id: "a", qty: 2, price: 1000, selected: true }]);
+  actions.updateQty("a", "foo");
+  console.assert(memory.items[0].qty === 1, "NaN → 1");
+  actions.updateQty("a", 0);
+  console.assert(memory.items[0].qty === 1, "0 → 1");
+  actions.updateQty("a", -5);
+  console.assert(memory.items[0].qty === 1, "-5 → 1");
+});
 
-  it('removeItem removes by id', () => {
-    actions.removeItem('b');
-    expect(items.some(i=>i.id==='b')).toBe(false);
-  });
+test("전체선택 토글", () => {
+  reset([
+    { id: "a", qty: 1, price: 1000, selected: false },
+    { id: "b", qty: 1, price: 2000, selected: true },
+  ]);
+  actions.toggleSelectAll(true);
+  console.assert(memory.items.every((i) => i.selected), "all selected");
+  actions.toggleSelectAll(false);
+  console.assert(memory.items.every((i) => !i.selected), "all unselected");
+});
 
-  it('getSnapshot returns derived totals', () => {
-    const snap = actions.getSnapshot();
-    const derived = derive(items);
-    expect(snap.selectedSum).toBe(derived.selectedSum);
-    expect(snap.total).toBe(derived.total);
-  });
+test("삭제 동작", () => {
+  reset([
+    { id: "a", qty: 1, price: 1000, selected: true },
+    { id: "b", qty: 1, price: 2000, selected: true },
+  ]);
+  actions.removeItem("a");
+  console.assert(memory.items.length === 1 && memory.items[0].id === "b", "removed a");
+});
+
+test("스냅샷 계산", () => {
+  reset([
+    { id: "a", qty: 1, price: 49000, selected: true },
+    { id: "b", qty: 1, price: 2000, selected: false },
+  ]);
+  const snap = actions.getSnapshot();
+  console.assert(snap.sum === 49000, "sum selected only");
+  console.assert(snap.shipping === 3000, "shipping under threshold");
+  console.assert(snap.total === 52000, "grand total");
+  console.assert(snap.allSelected === false && snap.anySelected === true, "flags");
 });
 

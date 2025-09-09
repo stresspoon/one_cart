@@ -1,47 +1,55 @@
-import * as storeModule from './cart.store.js';
-import { derive } from './cart.calc.js';
+import { getItems, setItems } from "./cart.store.js";
+import { sumSelected, shippingFee, grandTotal } from "./cart.calc.js";
 
-let store = storeModule; // DI for tests
-export function setStore(mock){ store = mock; }
-
-function update(mapper){
-  const items = store.getItems();
-  const next = items.map(mapper);
-  store.setItems(next);
-  return next;
+function normalizeQty(qty) {
+  const n = parseInt(qty, 10);
+  return Number.isFinite(n) && n >= 1 ? n : 1;
 }
 
-export function toggleSelect(id){
-  update(it => it.id === id ? { ...it, selected: !it.selected } : it);
+export function toggleSelect(id) {
+  const items = getItems();
+  const next = items.map((it) => (it.id === id ? { ...it, selected: !it.selected } : it));
+  setItems(next);
 }
 
-export function toggleSelectAll(flag){
-  const f = !!flag;
-  update(it => ({ ...it, selected: f }));
+export function toggleSelectAll(flag) {
+  const items = getItems();
+  const next = items.map((it) => ({ ...it, selected: Boolean(flag) }));
+  setItems(next);
 }
 
-export function updateQty(id, qty){
-  const q = Number.isFinite(qty) ? Math.max(1, Math.trunc(qty)) : 1;
-  update(it => it.id === id ? { ...it, qty: q } : it);
+export function updateQty(id, qty) {
+  const items = getItems();
+  const q = normalizeQty(qty);
+  const next = items.map((it) => (it.id === id ? { ...it, qty: q } : it));
+  setItems(next);
 }
 
-export function incrementQty(id){
-  update(it => it.id === id ? { ...it, qty: Math.max(1, Math.trunc(it.qty)+1) } : it);
+export function incrementQty(id) {
+  const items = getItems();
+  const next = items.map((it) => (it.id === id ? { ...it, qty: normalizeQty(it.qty + 1) } : it));
+  setItems(next);
 }
 
-export function decrementQty(id){
-  update(it => it.id === id ? { ...it, qty: Math.max(1, Math.trunc(it.qty)-1) } : it);
+export function decrementQty(id) {
+  const items = getItems();
+  const next = items.map((it) => (it.id === id ? { ...it, qty: Math.max(1, normalizeQty(it.qty - 1)) } : it));
+  setItems(next);
 }
 
-export function removeItem(id){
-  const items = store.getItems();
-  const next = items.filter(it => it.id !== id);
-  store.setItems(next);
+export function removeItem(id) {
+  const items = getItems();
+  const next = items.filter((it) => it.id !== id);
+  setItems(next);
 }
 
-export function getSnapshot(){
-  const items = store.getItems();
-  const { selectedSum, shipping, total, selectedCount } = derive(items);
-  return { items, selectedSum, shipping, total, selectedCount };
+export function getSnapshot() {
+  const items = getItems();
+  const sum = sumSelected(items);
+  const shipping = shippingFee(sum);
+  const total = grandTotal(sum);
+  const allSelected = items.length > 0 && items.every((i) => i.selected);
+  const anySelected = items.some((i) => i.selected);
+  return { items, sum, shipping, total, allSelected, anySelected };
 }
 

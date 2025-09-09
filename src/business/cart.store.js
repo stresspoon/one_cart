@@ -1,47 +1,51 @@
-import { SEED_ITEMS, DEFAULT_SETTINGS } from '../fixtures/seed.js';
+import { DEFAULT_SETTINGS, SEED_ITEMS } from "../fixtures/seed.js";
 
-const KEY_ITEMS = 'cart.items';
-const KEY_SETTINGS = 'cart.settings';
+const KEYS = {
+  ITEMS: "cart.items",
+  SETTINGS: "cart.settings",
+};
 
-function read(key){
-  try{
-    const raw = localStorage.getItem(key);
-    if(!raw) return undefined;
-    return JSON.parse(raw);
-  }catch(_){ return undefined; }
+function safeParse(json) {
+  if (json === undefined || json === null) return undefined;
+  try {
+    const val = JSON.parse(json);
+    if (val === undefined) return undefined;
+    return val;
+  } catch {
+    return undefined;
+  }
 }
 
-function write(key, value){
-  try{
-    localStorage.setItem(key, JSON.stringify(value));
-  }catch(_){ /* ignore quota */ }
+export function ensureSeed() {
+  const rawItems = localStorage.getItem(KEYS.ITEMS);
+  const rawSettings = localStorage.getItem(KEYS.SETTINGS);
+
+  const items = safeParse(rawItems);
+  const settings = safeParse(rawSettings);
+
+  if (!Array.isArray(items)) {
+    localStorage.setItem(KEYS.ITEMS, JSON.stringify(SEED_ITEMS));
+  }
+  if (!settings || typeof settings !== "object") {
+    localStorage.setItem(KEYS.SETTINGS, JSON.stringify(DEFAULT_SETTINGS));
+  }
 }
 
-export function ensureSeed(){
-  const items = read(KEY_ITEMS);
-  const settings = read(KEY_SETTINGS);
-  if(!Array.isArray(items)) write(KEY_ITEMS, SEED_ITEMS);
-  if(!settings || !settings.colors) write(KEY_SETTINGS, DEFAULT_SETTINGS);
+export function getItems() {
+  const parsed = safeParse(localStorage.getItem(KEYS.ITEMS));
+  return Array.isArray(parsed) ? parsed : [...SEED_ITEMS];
 }
 
-export function getItems(){
-  const v = read(KEY_ITEMS);
-  return Array.isArray(v) ? v : [];
+export function setItems(items) {
+  localStorage.setItem(KEYS.ITEMS, JSON.stringify(items));
 }
 
-export function setItems(items){
-  write(KEY_ITEMS, items);
+export function getSettings() {
+  const parsed = safeParse(localStorage.getItem(KEYS.SETTINGS));
+  return parsed || { ...DEFAULT_SETTINGS };
 }
 
-export function getSettings(){
-  const s = read(KEY_SETTINGS);
-  return s && s.colors ? s : { ...DEFAULT_SETTINGS };
+export function setSettings(settings) {
+  localStorage.setItem(KEYS.SETTINGS, JSON.stringify(settings));
 }
-
-export function setSettings(s){
-  write(KEY_SETTINGS, s);
-}
-
-// For migrations: export a placeholder hook (no-op)
-export function migrate(){ /* future schema migrations */ }
 

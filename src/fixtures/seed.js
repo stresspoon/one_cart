@@ -1,16 +1,91 @@
-export const SEED_ITEMS = [
-  { id:"ct-20ft", name:"20ft DRY 컨테이너(중고)", price:1800000, qty:1, selected:true,  imageUrl:"https://placehold.co/400x300?text=20ft+Container" },
-  { id:"ct-40hc", name:"40ft 하이큐브 컨테이너(중고)", price:2400000, qty:1, selected:false, imageUrl:"https://placehold.co/400x300?text=40ft+HC" },
-  { id:"pj-25",  name:"팔레트 잭 2.5t",      price:350000,  qty:1, selected:true,  imageUrl:"https://placehold.co/400x300?text=Pallet+Jack" },
-  { id:"seal-100",name:"컨테이너 봉인씰(100개)", price:45000,   qty:2, selected:true,  imageUrl:"https://placehold.co/400x300?text=Seals+100" },
-  { id:"strap-12",name:"강철 스트래핑 롤 12mm", price:18000,   qty:3, selected:false, imageUrl:"https://placehold.co/400x300?text=Strapping" },
-  { id:"des-20", name:"방습제(디시칸트) 20개", price:28000,   qty:1, selected:true,  imageUrl:"https://placehold.co/400x300?text=Desiccant" },
-  { id:"pal-10", name:"수출용 소독 팔레트 x10", price:110000,  qty:1, selected:false, imageUrl:"https://placehold.co/400x300?text=Pallet+Set" },
-  { id:"wrap-6", name:"수축랩(6롤)",           price:36000,   qty:1, selected:true,  imageUrl:"https://placehold.co/400x300?text=Shrink+Wrap" },
-];
+// Seed data for container shipment context
 
 export const DEFAULT_SETTINGS = {
-  colors:["#f2f1ef","#131313","#ff3d00"],
-  version:"v1"
+  colors: ["#f2f1ef", "#131313", "#ff3d00"],
+  version: "1.0.0",
 };
+
+export const SEED_ITEMS = [
+  {
+    id: "ct-20ft",
+    name: "20ft 컨테이너 임대",
+    price: 1200000,
+    qty: 1,
+    selected: true,
+    imageUrl: "https://placehold.co/400x300?text=20ft+Container",
+    desc: "표준 20피트 드라이 컨테이너. 내구성과 보안에 최적화.",
+  },
+  {
+    id: "ct-40hc",
+    name: "40HC 컨테이너 임대",
+    price: 2400000,
+    qty: 1,
+    selected: false,
+    imageUrl: "https://placehold.co/400x300?text=40HC+Container",
+    desc: "하이큐브 40피트 컨테이너. 추가 높이로 적재 효율 극대화.",
+  },
+  {
+    id: "pallet-jack",
+    name: "팔레트 잭",
+    price: 380000,
+    qty: 1,
+    selected: true,
+    imageUrl: "https://placehold.co/400x300?text=Pallet+Jack",
+    desc: "현장 이동용 수동 팔레트 트럭. 최대 2.5톤.",
+  },
+  {
+    id: "seal-100",
+    name: "봉인씰 (100개)",
+    price: 18000,
+    qty: 2,
+    selected: false,
+    imageUrl: "https://placehold.co/400x300?text=Seals+100",
+    desc: "고유 일련번호가 있는 보안 씰. 손쉬운 트래킹.",
+  },
+  {
+    id: "strapping-roll",
+    name: "스트래핑 롤",
+    price: 45000,
+    qty: 3,
+    selected: true,
+    imageUrl: "https://placehold.co/400x300?text=Strapping+Roll",
+    desc: "고강도 폴리에스터 밴드. 팔레트 고정용.",
+  },
+  {
+    id: "desiccant",
+    name: "방습제 (대형)",
+    price: 22000,
+    qty: 5,
+    selected: false,
+    imageUrl: "https://placehold.co/400x300?text=Desiccant",
+    desc: "장거리 해상 운송용 습기 제거제. 결로 방지.",
+  },
+  {
+    id: "shrink-wrap",
+    name: "수축랩 대용량",
+    price: 32000,
+    qty: 4,
+    selected: true,
+    imageUrl: "https://placehold.co/400x300?text=Shrink+Wrap",
+    desc: "투명 고탄성 필름. 적재물 보호 및 방진.",
+  },
+  {
+    id: "export-pallet",
+    name: "수출용 팔레트 세트 (10EA)",
+    price: 260000,
+    qty: 1,
+    selected: false,
+    imageUrl: "https://placehold.co/400x300?text=Export+Pallet+Set",
+    desc: "열처리 인증 목재 팔레트. 국제 규격 준수.",
+  },
+  {
+    id: "corner-protector",
+    name: "코너 프로텍터 (50EA)",
+    price: 55000,
+    qty: 1,
+    selected: true,
+    imageUrl: "https://placehold.co/400x300?text=Corner+Protector",
+    desc: "스트랩 압력 분산 보호대. 모서리 파손 방지.",
+  },
+];
 
